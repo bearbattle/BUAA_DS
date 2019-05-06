@@ -17,6 +17,7 @@
     "C_Cpp.autocomplete": "Default",
     
     "c-cpp-flylint.cppcheck.executable": "C:\\Program Files\\Cppcheck\\cppcheck.exe",
+
     "markdown-pdf.executablePath": "C:\\Users\\chao4\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe",
     "files.associations": {
         "type_traits": "c",
