@@ -15,9 +15,8 @@
     "C_Cpp.intelliSenseEngine": "Default", // 可以为Default或Tag Parser，后者较老，功能较简单。具体差别参考cpptools扩展文档
     "C_Cpp.errorSquiggles": "Enabled",
     "C_Cpp.autocomplete": "Default",
-
-    "c-cpp-flylint.cppcheck.executable":"C:\\Program Files\\Cppcheck\\cppcheck.exe",
-
+    
+    "c-cpp-flylint.cppcheck.executable": "C:\\Program Files\\Cppcheck\\cppcheck.exe",
     "markdown-pdf.executablePath": "C:\\Users\\chao4\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe",
     "files.associations": {
         "type_traits": "c",
@@ -28,11 +27,20 @@
         "cctype": "c",
         "c++config.h": "c"
     },
+
     "C_Cpp.dimInactiveRegions": false,
     "C_Cpp.default.cStandard": "c99", // 效果效果比cpptools要好
     "C_Cpp.intelliSenseCacheSize": 0,
+
     "c-cpp-flylint.clang.enable": false,
     "c-cpp-flylint.language": "c",
     "c-cpp-flylint.run": "onType",
-    "c-cpp-flylint.flexelint.enable": false
+    "c-cpp-flylint.flexelint.enable": false,
+
+    "editor.snippetSuggestions": "none",
+
+    "vscode_custom_css.imports": [
+        "file:///C:/Users/chao4/.vscode/extensions/robbowen.synthwave-vscode-0.0.7/synthwave84.css"
+        ]
+    
 }
