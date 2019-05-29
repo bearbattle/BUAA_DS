@@ -1,3 +1,10 @@
+/*************************
+*   Title:  Sort
+*   Author: BearHuchao
+*   Data:   2019.5.24-25
+*   Note:   Lots of sort method
+*************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 
