@@ -1,284 +1,144 @@
-#include <stdio.h>
-#include <stdlib.h>
+int num[12][7] = {
+    //æ ‡å‡†å­—åº“
+    {1, 1, 1, 1, 1, 1, 0}, //0 or O
+    {0, 1, 1, 0, 0, 0, 0}, //1
+    {1, 1, 0, 1, 1, 0, 1}, //2
+    {1, 1, 1, 1, 0, 0, 1}, //3
+    {0, 1, 1, 0, 0, 1, 1}, //4
+    {1, 0, 1, 1, 0, 1, 1}, //5
+    {1, 0, 1, 1, 1, 1, 1}, //6
+    {1, 1, 1, 0, 0, 0, 0}, //7
+    {1, 1, 1, 1, 1, 1, 1}, //8
+    {1, 1, 1, 1, 0, 1, 1}, //9
+    {1, 0, 0, 0, 1, 1, 1}, //F,10
+    {0, 0, 0, 0, 0, 0, 0}  //NULL,11
+};
 
-#define classnum 6       //°à¼¶ÊıÁ¿
-#define timenum 3        //Ã¿ÌìµÄ¿ÎÊ±ÊıÁ¿
-#define coursenum 6      //¿Î³ÌÊıÁ¿
-#define studentnum 232   //Ñ§ÉúÊıÁ¿
-#define classcapacity 55 //½ÌÊÒ×î´óÈİÁ¿
+int Cube[3] = {2, 3, 4}; //æ•°ç ç®¡å¼•è„š
+int Trig = 12;
+int Echo = 13; //è¶…å£°æ³¢æµ‹è·å¼•è„š
+int Green = 14;
+int Red = 15; //LEDå¼•è„š
 
-int table[timenum][classnum] = {
-    {0, 4, 0, 5, 3, 2},
-    {2, 3, 1, 1, 5, 0},
-    {2, 4, 4, 3, 1, 5}};
-//±íÊ¾µÚ¼¸¸ö½ÌÊÒÄÄÒ»¸ö¿ÎÊ±ÉÏÊ²Ã´¿Î£¬ÊıÖµ012345ÎªÀí»¯ÉúÊ·µØÕş
-//                                          0 1 2 3 4 5
+double SonicDis();
+void LEDControl(int pin, int val);
+void DisplayAns(int ans);
+void CubeSelect(int pin);
+void DisplayNum(int n);
 
-typedef struct student
+void setup()
 {
-    int choice[coursenum];  //012345·Ö±ğ¶ÔÓ¦Àí»¯ÉúÊ·µØÕş£¬ÊıÖµ1±íÊ¾Ñ¡ÁË£¬ÊıÖµ2±íÊ¾Ã»Ñ¡
-    int timetable[timenum]; //012·Ö±ğ¶ÔÓ¦µÚ123¿ÎÊ±£¬ÊıÖµ±íÊ¾ÔÚÄÄ¸ö½ÌÊÒ
-} STUDENT;
-
-typedef struct classroom
-{
-    int stunum; //ÏÖÔÚ½ÌÊÒÒÑÓĞÈËÊı
-    int stuname[classcapacity];
-} CLASSROOM;
-
-void Initialize(STUDENT *Pstu);
-void Choose(STUDENT *Pstu, CLASSROOM (*Pclassroom)[timenum]);
-void Printresult(STUDENT *Pstu, CLASSROOM (*Pclassroom)[timenum]);
-
-int main()
-{
-    int i, j, k;
-    STUDENT stu[studentnum], *Pstu;         //¶¨Òå232¸öÑ§Éú
-    CLASSROOM classroom[timenum][classnum]; //Ã¿¸öÊ±¼ä¶Î¶¨ÒåÒ»¸ö½ÌÊÒ
-
-    //Ñ§Éú³õÊ¼»¯
-    for (i = 0; i < studentnum; i++)
+    // put your setup code here, to run once:
+    Serial.begin(9600);
+    for (int i = 2; i <= 15; i++)
     {
-        for (j = 0; j < coursenum; j++)
-            stu[i].choice[j] = -1;
-        for (j = 0; j < timenum; j++)
-            stu[i].timetable[j] = -1; //Î´Ñ¡µ½½ÌÊÒµÄÖÃÎª-1
+        pinMode(i, OUTPUT);
+        digitalWrite(i, LOW);
     }
-
-    //½ÌÊÒ³õÊ¼»¯
-    for (i = 0; i < timenum; i++)
-        for (j = 0; j < classnum; j++)
-        {
-            classroom[i][j].stunum = 0;
-            for (k = 0; k < classcapacity; k++)
-                classroom[i][j].stuname[k] = -1; //ÎŞÑ§ÉúÕ¼Î»Ê±ÖÃÎª-1£»
-        }
-
-    Initialize(stu);             //Â¼ÈëÑ§ÉúËùÑ¡¿Î³Ì
-    Choose(stu, classroom);      //Ñ§ÉúÑ¡½ÌÊÒ
-    Printresult(stu, classroom); //´òÓ¡½á¹û
-
-    /*
-	for(i = 0; i < coursenum; i++)
-	{
-		printf("Ñ¡ÁË¿ÆÄ¿%dµÄÑ§ÉúÓĞ£º\n",i+1);
-		for(j = 0; j < studentnum; j++)
-		{
-			if (stu[j].choice[i] == 1) printf("Ñ§Éú%d\n",j+1);
-		}
-		printf("\n");
-	}*/
+    pinMode(Trig, OUTPUT);
+    pinMode(Echo, INPUT);
 }
 
-void Initialize(STUDENT *Pstu)
+void loop()
 {
-    int i, j, k,
-        in[20] = {17, 9, 3, 5, 4, 3, 3, 6, 26, 8, 11, 7, 12, 4, 9, 26, 7, 53, 17, 2};
-    //»¯µØÉú17£¬»¯ÀúµØ9£¬»¯ÀúÉú3£¬ÀúµØÉú5£¬ÕşµØÉú4£¬Õş»¯µØ3£¬Õş»¯Àú3£¬Õş»¯Éú6£¬ÕşÀúµØ26£¬ÕşÀúÉú8¡£
-    //ÕşÎïµØ11£¬ÕşÎï»¯7£¬ÕşÎïÀú12£¬ÕşÎïÉú4£¬ÎïµØÉú9£¬Îï»¯µØ26£¬Îï»¯Àú7£¬Îï»¯Éú53£¬ÎïÀúµØ17£¬ÎïÀúÉú2¡£
-
-    k = 0;
-    for (i = 0; i < in[0]; i++)
+    // put your main code here, to run repeatedly:
+    int t = 50;
+    double dis = SonicDis();
+    Serial.print(dis, 2);
+    Serial.println("cm");
+    if (dis < 5)
     {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //»¯µØÉú
-    for (i = 0; i < in[1]; i++)
-    {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //»¯ÀúµØ
-    for (i = 0; i < in[2]; i++)
-    {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[3] = 1;
-        k++;
-    } //»¯ÀúÉú
-    for (i = 0; i < in[3]; i++)
-    {
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //ÀúµØÉú
-    for (i = 0; i < in[4]; i++)
-    {
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[4] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşµØÉú
-
-    for (i = 0; i < in[5]; i++)
-    {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[4] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //Õş»¯µØ
-    for (i = 0; i < in[6]; i++)
-    {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //Õş»¯Àú
-    for (i = 0; i < in[7]; i++)
-    {
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //Õş»¯Éú
-    for (i = 0; i < in[8]; i++)
-    {
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[4] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÀúµØ
-    for (i = 0; i < in[9]; i++)
-    {
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÀúÉú
-
-    for (i = 0; i < in[10]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[4] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÎïµØ
-    for (i = 0; i < in[11]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÎï»¯
-    for (i = 0; i < in[12]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÎïÀú
-    for (i = 0; i < in[13]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[5] = 1;
-        k++;
-    } //ÕşÎïÉú
-    for (i = 0; i < in[14]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //ÎïµØÉú
-
-    for (i = 0; i < in[15]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //Îï»¯µØ
-    for (i = 0; i < in[16]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[3] = 1;
-        k++;
-    } //Îï»¯Àú
-    for (i = 0; i < in[17]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[1] = 1;
-        (Pstu)[k].choice[2] = 1;
-        k++;
-    } //Îï»¯Éú
-    for (i = 0; i < in[18]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[3] = 1;
-        (Pstu)[k].choice[4] = 1;
-        k++;
-    } //ÎïÀúµØ
-    for (i = 0; i < in[19]; i++)
-    {
-        (Pstu)[k].choice[0] = 1;
-        (Pstu)[k].choice[2] = 1;
-        (Pstu)[k].choice[3] = 1;
-        k++;
-    } //ÎïÀúÉú
+        LEDControl()
+    }
+    DisplayAns(dis, t);
 }
 
-void Choose(STUDENT *Pstu, CLASSROOM (*Pclassroom)[timenum])
+double SonicDis()
 {
-    int i, j, k, l, m, n, sitflag[timenum][classnum] = {0}, chooseflag[coursenum] = {1}, timeflag[timenum] = {1};
-    for (i = 0; i < studentnum; i++) //¶ÔÑ§Éú¿ªÊ¼±éÀú
+    double dis;
+    // æ£€æµ‹è„‰å†²å®½åº¦ï¼Œå¹¶è®¡ç®—å‡ºè·ç¦»
+    digitalWrite(Trig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(Trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(Trig, LOW);
+    dis = pulseIn(Echo, HIGH) / 58.00;
+    return dis;
+}
+
+void LEDControl(int pin, int t)
+{
+    while (t--)
     {
-        for (n = 0; n < coursenum; n++)
-            chooseflag[n] = 1; //ÕâÃÅ¿ÎÒÑÑ¡±êÖ¾³õÊ¼»¯
-        for (l = 0; l < timenum; l++)
-            timeflag[l] = 1;            //¿ÉÑ¡ÔñÊ±¼ä³õÊ¼»¯
-        for (j = 0; j < coursenum; j++) //¶ÔÑ§ÉúËùÑ¡¿Î³Ì¿ªÊ¼±éÀú
-        {
-            if ((Pstu)[i].choice[j] != 0) //Èç¹ûÑ§ÉúÑ¡ÁËÕâÃÅ¿Î
-            {
-                for (m = 0; m < timenum; m++)
-                    for (k = 0; k < classnum; k++) //±éÀúËùÓĞ½ÌÊÒ
-                    {
-                        if ((table[m][k] == j) && ((Pclassroom)[m][k].stunum <= classcapacity) && (chooseflag[j]) && (timeflag[m])) //Èç¹ûÕÒµ½ÁËÇÒÑ§ÉúÊıÁ¿²»´óÓÚ×î´óÈİÁ¿ÇÒÕâ¸ö¿Î³ÌÎ´±»Ñ¡ÇÒÕâ¸ö¿ÎÊ±»¹Ã»¿Î
-                        {
-                            Pclassroom[m][k].stunum++;                   //¸Ã½ÌÊÒÑ§ÉúÊı£«1
-                            Pclassroom[m][k].stuname[sitflag[m][k]] = i; //¸ÃÎ»ÖÃ×ùÎ»×øÁËÄÇ¸öÑ§Éú
-                            sitflag[m][k]++;                             //×ùÎ»ĞòºÅ¼ÓÒ»
-                            chooseflag[j] = 0;                           //½«ÕâÃÅ¿Î±ê¼ÇÎªÒÑÑ¡
-                            timeflag[m] = 0;                             //½«Õâ¸öÊ±¼ä±êÎªÒÑÑ¡
-                            (Pstu)[i].timetable[m] = k;                  //½«Ñ§ÉúµÄ¿Î±í°²ÅÅÉèÖÃÎª´Ë½ÌÊÒ
-                        }
-                    }
-            }
-        }
+    }
+    return 1;
+}
+if (pin > 150)
+{
+    digitalWrite(15, HIGH);
+    while (t--)
+    {
+        CubeSelect(2);
+        DisplayNum(10);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
+
+        CubeSelect(3);
+        DisplayNum(10);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
+
+        CubeSelect(4);
+        DisplayNum(0);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
+    }
+    return 1;
+}
+digitalWrite(14, LOW);
+digitalWrite(15, LOW);
+return 0;
+}
+
+void DisplayNum(int n) //å•æ•°å­—æ˜¾ç¤º
+{
+    for (int i = 0; i < 7; i++)
+        digitalWrite(5 + i, num[n][i]);
+}
+
+void DisplayAns(double dis)
+{
+    int ans;
+    while (dis <= 100)
+        dis *= 10;
+    ans = (int)dis;
+    while (t--)
+    {
+        CubeSelect(2);
+        DisplayNum(ans % 10);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
+
+        CubeSelect(3);
+        DisplayNum(ans / 10 % 10);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
+
+        CubeSelect(4);
+        DisplayNum(ans / 100);
+        delay(1);
+        DisplayNum(11);
+        delay(1);
     }
 }
 
-void Printresult(STUDENT *Pstu, CLASSROOM (*Pclassroom)[timenum])
+void CubeSelect(int led)
 {
-    int i, j, k, flag[studentnum] = {0};
-
-    for (i = 0; i < timenum; i++)
-        for (j = 0; j < classnum; j++)
-        {
-            printf("µÚ%d½Ú¿Î   µÚ%d¸ö½ÌÊÒµÄÑ§ÉúÓĞ£º\n", i + 1, j + 1);
-            for (k = 0; k < (Pclassroom)[i][j].stunum; k++)
-            {
-                if ((Pclassroom)[i][j].stuname[k] == -1)
-                    break;
-                printf("Ñ§Éú%d\t", (Pclassroom)[i][j].stuname[k] + 1);
-                if ((k + 1) % 10 == 0)
-                    printf("\n");
-            }
-            printf("\n");
-            printf("\n");
-            printf("\n");
-        }
-    printf("Ã»Ñ¡µ½½ÌÊÒµÄÑ§ÉúÓĞ£º\n");
-    for (i = 0; i < studentnum; i++)
-    {
-        for (j = 0; j < timenum; j++)
-            if ((Pstu)[i].timetable[j] == -1)
-                printf("Ñ§Éú%dµÄµÚ%d½Ú¿Î\n", i + 1, j + 1);
-    }
+    for (int i = 2; i <= 4; i++)
+        digitalWrite(i, i == led ? LOW : HIGH);
 }
