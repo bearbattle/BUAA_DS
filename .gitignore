@@ -1,6 +1,7 @@
 # VSCode
 .vscode/
 .TMP/
+/*/cmake*
 
 # Prerequisites
 *.d
