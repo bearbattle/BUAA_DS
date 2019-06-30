@@ -16,10 +16,14 @@ typedef struct Node
 {
     char Name[50];
     int flag;
+    edge *from;
     edge *list;
 } node;
 
 node map[501];
+int path[501][501];
+int destination;
+int CountOfStation = 0;
 
 void Init();
 
@@ -27,8 +31,16 @@ void Dijkstra();
 
 int main()
 {
+    int i;
+    char beg[50], end[50];
     Init();
-
+    scanf("%s", beg);
+    scanf("%s", end);
+    Dijkstra(beg, end);
+    for (i = 0; path[destination][i] != -1; i++)
+    {
+        printf("%s ", map[path[destination][i]].Name);
+    }
     return 0;
 }
 
@@ -37,7 +49,6 @@ void Init()
     FILE *IN;
     int SumOfLine, line[13];
     int SumOfStation[13];
-    int CountOfStation = 0;
     node Line[13][50];
     int i, j, k;
     int des;
@@ -158,7 +169,80 @@ void Init()
     }
 }
 
-void Dijkstra()
+void Dijkstra(char *Start, char *Des)
 {
-    
+    int flag[CountOfStation];
+    int dis[CountOfStation];
+    int mid;
+    int i, j;
+    int pos[CountOfStation];
+    int lowcost;
+    int beg = -1, end = -1;
+    edge *tmp;
+    for (i = 0; i < CountOfStation; i++)
+    {
+        if (strcmp(Start, map[i].Name) == 0)
+        {
+            beg = i;
+        }
+        if (strcmp(Des, map[i].Name) == 0)
+        {
+            end = i;
+        }
+        if (beg >= 0 && end >= 0)
+            break;
+    }
+    destination = end;
+
+    memset(flag, 0, sizeof(flag));
+    memset(pos, 0, sizeof(pos));
+    for (i = 0; i < CountOfStation; i++)
+        for (j = 0; j < CountOfStation; j++)
+            path[i][j] = -1;
+
+    for (i = 0; i < CountOfStation; i++)
+    {
+        path[i][0] = beg;
+        dis[i] = INF;
+    }
+    for (tmp = map[beg].list; tmp != NULL; tmp = tmp->next)
+    {
+        map[tmp->end].from = tmp;
+        dis[tmp->end] = tmp->weight;
+    }
+    flag[beg] = 1;
+
+    while (1)
+    {
+        lowcost = INF;
+        for (j = 0; j < CountOfStation; j++)
+        {
+            if (flag[j] == 0 && dis[j] < lowcost)
+            {
+                mid = j;
+                lowcost = dis[j];
+            }
+        }
+        flag[mid] = 1;
+        path[mid][++pos[mid]] = mid;
+        tmp = map[mid].list;
+        while (tmp != NULL)
+        {
+            if (flag[tmp->end])
+            {
+                tmp = tmp->next;
+                continue;
+            }
+            if (dis[mid] + tmp->weight < dis[tmp->end])
+            {
+                dis[tmp->end] = dis[mid] + tmp->weight;
+                map[tmp->end].from = tmp;
+                for (j = 0; j < pos[mid]; j++)
+                    path[tmp->end][j] = path[mid][j];
+            }
+            tmp = tmp->next;
+        }
+        if (flag[end])
+            break;
+    }
 }
